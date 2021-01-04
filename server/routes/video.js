@@ -42,6 +42,19 @@ router.post('/uploadfiles', (req, res) => {
 
 router.post('/thumbnail', (req, res) => {
   // 썸네일 생성하고 비디오 듀레이션(러닝 타임) 가져오기
+
+  let thumbsFilePath ="";
+  let fileDuration ="";
+  
+  // 비디오 정보 가져오기 
+  ffmpeg.ffprobe(req.body.filePath, function(err, metadata){
+    console.dir(metadata);
+    console.log(metadata.format.duration);
+    fileDuration = metadata.format.duration;
+  })
+
+
+  // 썸네일 생성
   ffmpeg(req.body.filePath)
     .on('filenames', function (filenames) {
       console.log('Will generate ' + filenames.join(', '))
