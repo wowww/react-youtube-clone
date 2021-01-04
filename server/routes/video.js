@@ -5,7 +5,7 @@ const router = express.Router();
 
 const { auth } = require('../middleware/auth');
 const multer = require("multer");
-
+var ffmpeg = require("fluent-ffmpeg");
 
 let storage = multer.diskStorage({
   destination: (req, file, cb) => {
@@ -40,6 +40,26 @@ router.post('/uploadfiles', (req, res) => {
   })
 })
 
+router.post('/thumbnail', (req, res) => {
+  // 썸네일 생성하고 비디오 듀레이션(러닝 타임) 가져오기
+  ffmpeg(req.body.filePath)
+    .on('filenames', function (filenames) {
+      console.log('Will generate ' + filenames.join(', '))
+      thumbsFilePath = "uploads/thumbnails/" + filenames[0];
+    })
+    .on('end', function () {
+      console.log('Screenshots taken');
+      return res.json({ success: true, thumbsFilePath: thumbsFilePath, fileDuration: fileDuration})
+    })
+    .screenshots({
+      // Will take screens at 20%, 40%, 60% and 80% of the video
+      count: 3,
+      folder: 'uploads/thumbnails',
+      size:'320x240',
+      // %b input basename ( filename w/o extension )
+      filename:'thumbnail-%b.png'
+    });
+})
 
 
 module.exports = router;
